@@ -12,7 +12,7 @@ This project simulates a real-world enterprise LAN while following documentation
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
 | **Vendor**        | Cisco                                                                                                  |
 | **Project Type**  | Enterprise LAN                                                                                         |
-| **Difficulty**    | ⭐ Beginner                                                                                         |
+| **Difficulty**    | ⭐ Intermediate                                                                                         |
 | **Lab Platform**  | Cisco Packet Tracer 9.0.1                                                                              |
 | **Technologies**  | VLAN, IEEE 802.1Q Trunking, Router-on-a-Stick (ROAS), Inter-VLAN Routing, Centralized DHCP, DHCP Relay |
 | **Documentation** | Included                                                                                               |
@@ -21,12 +21,13 @@ This project simulates a real-world enterprise LAN while following documentation
 
 ## Network Devices
 
-| Device      | Model               | Quantity |
-| ----------- | ------------------- | -------: |
-| Router      | Cisco 2911          |        1 |
-| Switch      | Cisco Catalyst 2960 |        2 |
-| DHCP Server | Generic Server      |        1 |
-| End Devices | Generic PC          |        6 |
+| Device      | Model                    | Quantity |
+| ----------- | ------------------------ | -------: |
+| Router      | Cisco 2911               |        1 |
+| Switch      | Cisco Catalyst 3560-24PS |        1 |
+| Switch      | Cisco Catalyst 2960      |        1 |
+| DHCP Server | Generic Server           |        1 |
+| End Devices | Generic PC               |        6 |
 
 ---
 
@@ -76,7 +77,7 @@ A dedicated server network is used for centralized infrastructure services:
 192.168.100.0/24
 ```
 
-The router performs Layer 3 forwarding between the departmental VLANs and the server network.
+The Cisco 2911 router performs Layer 3 forwarding between the departmental VLANs and the server network.
 
 The project demonstrates the following traffic flow:
 
@@ -305,6 +306,14 @@ configs/
 ├── R1.cfg
 ├── SW1.cfg
 └── SW2.cfg
+```
+
+### Device Inventory
+
+```text
+R1  → Cisco 2911
+SW1 → Cisco Catalyst 3560-24PS
+SW2 → Cisco Catalyst 2960
 ```
 
 These configuration files provide a reproducible reference for:
