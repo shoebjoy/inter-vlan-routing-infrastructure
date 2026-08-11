@@ -2,7 +2,7 @@
 
 Production-style Cisco Packet Tracer lab demonstrating VLAN segmentation, IEEE 802.1Q trunking, Router-on-a-Stick (ROAS), Inter-VLAN Routing, centralized DHCP, DHCP relay, and dedicated server-network connectivity for a small enterprise office environment.
 
-This project simulates a real-world enterprise LAN while following documentation, configuration management, validation, and repository standards commonly used in professional network engineering.
+This project simulates a real-world enterprise LAN while following documentation, configuration management, validation, troubleshooting, and repository standards commonly used in professional network engineering.
 
 ---
 
@@ -45,12 +45,12 @@ The Cisco 2911 router provides:
 
 * Inter-VLAN Routing
 * Default gateway services for VLAN 10, VLAN 20, and VLAN 30
-* Connectivity to the dedicated server network
+* Layer 3 connectivity to the dedicated server network
 * DHCP relay functionality
 
 The centralized DHCP server operates on the separate `192.168.100.0/24` network.
 
-DHCP requests from the departmental VLANs are forwarded to the centralized server using:
+DHCP requests from the departmental VLANs are forwarded to the centralized DHCP server using:
 
 ```cisco
 ip helper-address 192.168.100.10
@@ -78,7 +78,7 @@ A dedicated server network is used for centralized infrastructure services:
 
 The router performs Layer 3 forwarding between the departmental VLANs and the server network.
 
-The project therefore demonstrates the complete traffic flow:
+The project demonstrates the following traffic flow:
 
 ```text
 Client
@@ -94,6 +94,21 @@ R1 Router-on-a-Stick
 Inter-VLAN Routing
    ↓
 Destination VLAN / Server Network
+```
+
+For DHCP specifically:
+
+```text
+DHCP Client
+     ↓
+Department VLAN
+     ↓
+R1
+     │
+     │ ip helper-address
+     ↓
+DHCP Server
+192.168.100.10
 ```
 
 ---
@@ -134,7 +149,7 @@ It is intended for networking students, networking enthusiasts, junior network e
 
 * Design a small enterprise office network
 * Segment departments using VLANs
-* Configure switch access ports
+* Configure Cisco switch access ports
 * Configure IEEE 802.1Q trunk links
 * Implement Router-on-a-Stick (ROAS)
 * Enable Inter-VLAN Routing
@@ -178,7 +193,7 @@ To reproduce this project, you will need:
 
 The complete software and hardware environment is documented in:
 
-**`docs/lab-environment.md`**
+**[LAB-ENVIRONMENT.md](LAB-ENVIRONMENT.md)**
 
 ---
 
@@ -213,8 +228,7 @@ VLAN-Based-Office-Network/
 │   ├── implementation.md
 │   ├── ip-addressing.md
 │   ├── troubleshooting.md
-│   ├── validation.md
-│   └── lab-environment.md
+│   └── validation.md
 │
 ├── topology/
 │   ├── topology.drawio
@@ -230,6 +244,7 @@ VLAN-Based-Office-Network/
 │
 ├── images/
 │
+├── LAB-ENVIRONMENT.md
 ├── README.md
 ├── LICENSE
 └── .gitignore
@@ -239,14 +254,14 @@ VLAN-Based-Office-Network/
 
 ## Documentation
 
-| Document             | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| `architecture.md`    | Network architecture and design                          |
-| `implementation.md`  | Step-by-step implementation guide                        |
-| `ip-addressing.md`   | IP addressing and VLAN allocation plan                   |
-| `validation.md`      | Network validation and testing results                   |
-| `troubleshooting.md` | Troubleshooting procedures and findings                  |
-| `lab-environment.md` | Software versions, device inventory, and lab environment |
+| Document                                             | Description                                              |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| [`docs/architecture.md`](docs/architecture.md)       | Network architecture and design                          |
+| [`docs/implementation.md`](docs/implementation.md)   | Step-by-step implementation guide                        |
+| [`docs/ip-addressing.md`](docs/ip-addressing.md)     | IP addressing and VLAN allocation plan                   |
+| [`docs/validation.md`](docs/validation.md)           | Network validation and testing results                   |
+| [`docs/troubleshooting.md`](docs/troubleshooting.md) | Troubleshooting procedures and findings                  |
+| [`LAB-ENVIRONMENT.md`](LAB-ENVIRONMENT.md)           | Software versions, device inventory, and lab environment |
 
 ---
 
@@ -263,7 +278,7 @@ The complete lab environment, including:
 
 is documented in:
 
-**`docs/lab-environment.md`**
+**[LAB-ENVIRONMENT.md](LAB-ENVIRONMENT.md)**
 
 ---
 
@@ -277,7 +292,7 @@ The **lab** directory contains the Cisco Packet Tracer project used to build and
 lab/vlan-based-office-network.pkt
 ```
 
-The file contains the complete simulated network topology and device configuration.
+The Packet Tracer project contains the complete simulated network topology and device configuration.
 
 ---
 
@@ -298,6 +313,7 @@ These configuration files provide a reproducible reference for:
 * VLAN configuration
 * Access-port configuration
 * Trunk configuration
+* Router subinterfaces
 * DHCP relay configuration
 * IP addressing
 
@@ -330,23 +346,26 @@ HR-PC1 → Sales-PC1
 HR-PC1 → IT-PC1
 HR-PC1 → DHCP Server
 
-Sales-PC1 → Sales Gateway
-Sales-PC1 → IT-PC1
-Sales-PC1 → DHCP Server
+SA-PC1 → Sales Gateway
+SA-PC1 → HR-PC1
+SA-PC1 → IT-PC1
+SA-PC1 → DHCP Server
 
 IT-PC1 → IT Gateway
+IT-PC1 → HR-PC1
+IT-PC1 → Sales-PC1
 IT-PC1 → DHCP Server
 ```
 
-Validation evidence and test results are documented in:
+Validation evidence and detailed test results are documented in:
 
-**`docs/validation.md`**
+**[`docs/validation.md`](docs/validation.md)**
 
 ---
 
 ## Troubleshooting
 
-The implementation process included troubleshooting of:
+The implementation process included troubleshooting and verification of:
 
 * Trunk operational state
 * Router interface state
@@ -357,11 +376,23 @@ The implementation process included troubleshooting of:
 * Initial ICMP packet loss
 * Packet Tracer command-line limitations
 
-The troubleshooting methodology followed a structured Layer 1 → Layer 2 → Layer 3 → Services → End-to-End approach.
+The troubleshooting methodology followed a structured approach:
+
+```text
+Layer 1
+   ↓
+Layer 2
+   ↓
+Layer 3
+   ↓
+DHCP / Services
+   ↓
+End-to-End Connectivity
+```
 
 Detailed troubleshooting records are available in:
 
-**`docs/troubleshooting.md`**
+**[`docs/troubleshooting.md`](docs/troubleshooting.md)**
 
 ---
 
@@ -390,8 +421,6 @@ After completing this project, you should understand how to:
 ## Future Improvements
 
 The current implementation provides the foundation for additional enterprise networking capabilities.
-
-Possible enhancements include:
 
 ### Network Security
 
@@ -429,7 +458,7 @@ Possible enhancements include:
 * Network Monitoring
 * Centralized Logging
 
-### Automation
+### Network Automation
 
 * Python
 * Netmiko
