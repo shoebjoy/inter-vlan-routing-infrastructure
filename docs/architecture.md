@@ -27,20 +27,18 @@ A dedicated server network is used for infrastructure services such as DHCP.
 
 ## 2. High-Level Topology
 
-![Network Topology](../images/network-topology.png)
-
 ```text
                          ┌──────────────────────┐
                          │     DHCP Server      │
                          │    192.168.100.10    │
-                         │      Server VLAN     │
+                         │   Server Network     │
                          └──────────┬───────────┘
                                     │
                               192.168.100.0/24
                                     │
                              ┌──────┴──────┐
                              │     R1      │
-                             │   Router    │
+                             │ Cisco 2911  │
                              │             │
                              │ Router-on-  │
                              │   a-Stick   │
@@ -48,36 +46,50 @@ A dedicated server network is used for infrastructure services such as DHCP.
                                     │
                               802.1Q Trunk
                                     │
-                             ┌──────┴──────┐
-                             │     SW1     │
-                             │   Switch    │
-                             └──────┬──────┘
+                         ┌──────────┴──────────┐
+                         │         SW1         │
+                         │ Cisco Catalyst      │
+                         │     3560-24PS       │
+                         └──────────┬──────────┘
                                     │
                               802.1Q Trunk
                                     │
-                             ┌──────┴──────┐
-                             │     SW2     │
-                             │   Switch    │
-                             └───┬───┬───┬─┘
-                                 │   │   │
+                         ┌──────────┴──────────┐
+                         │         SW2         │
+                         │ Cisco Catalyst      │
+                         │        2960        │
+                         └──────┬────┬────┬───┘
+                                │    │    │
                               VLAN10 VLAN20 VLAN30
-                                 │   │   │
-                                HR  SALES IT
+                                │    │    │
+                               HR  SALES  IT
 ```
 
 ---
 
 ## 3. Network Devices
 
-| Device      | Role                                             |
-| ----------- | ------------------------------------------------ |
-| R1          | Inter-VLAN routing, default gateways, DHCP relay |
-| SW1         | Main access/distribution switch                  |
-| SW2         | Access switch                                    |
-| DHCP Server | Centralized DHCP service                         |
-| HR PCs      | VLAN 10 clients                                  |
-| SALES PCs   | VLAN 20 clients                                  |
-| IT PCs      | VLAN 30 clients                                  |
+| Device      | Model                    | Role                                             |
+| ----------- | ------------------------ | ------------------------------------------------ |
+| R1          | Cisco 2911               | Inter-VLAN routing, default gateways, DHCP relay |
+| SW1         | Cisco Catalyst 3560-24PS | Main Layer 2 switching / distribution switch     |
+| SW2         | Cisco Catalyst 2960      | Access switch                                    |
+| DHCP Server | Generic Server           | Centralized DHCP service                         |
+| HR PCs      | Generic PC               | VLAN 10 clients                                  |
+| SALES PCs   | Generic PC               | VLAN 20 clients                                  |
+| IT PCs      | Generic PC               | VLAN 30 clients                                  |
+
+### Switch Roles
+
+**SW1 — Cisco Catalyst 3560-24PS**
+
+SW1 acts as the primary switch in the topology and provides Layer 2 connectivity between R1 and SW2.
+
+Although the Catalyst 3560 supports Layer 3 switching capabilities, this project intentionally uses R1 for Inter-VLAN Routing through Router-on-a-Stick. This keeps the lab focused on 802.1Q trunking, router subinterfaces, and centralized routing.
+
+**SW2 — Cisco Catalyst 2960**
+
+SW2 operates as the access-layer switch and connects the departmental end devices to the VLAN infrastructure.
 
 ---
 
@@ -171,9 +183,11 @@ This allows a single physical router interface to provide Layer 3 gateways for m
 
 ## 6. Trunk Architecture
 
-The links between the router/switch infrastructure carry multiple VLANs simultaneously.
+The links between the router and switching infrastructure carry multiple VLANs simultaneously.
 
 The network uses IEEE 802.1Q trunking.
+
+### R1 ↔ SW1
 
 The trunk between R1 and SW1 carries:
 
@@ -182,6 +196,10 @@ VLAN 10
 VLAN 20
 VLAN 30
 ```
+
+This allows R1 to receive and route traffic from all departmental VLANs through its `GigabitEthernet0/0` subinterfaces.
+
+### SW1 ↔ SW2
 
 The trunk between SW1 and SW2 also carries:
 
@@ -299,7 +317,7 @@ The same principle applies to communication between VLAN 10 and VLAN 30 or VLAN 
 
 ## 9. Layered Architecture
 
-The implementation can be understood using the following layers:
+The implementation can be understood using the following layers.
 
 ### Layer 2 — Switching
 
@@ -312,6 +330,8 @@ Responsible for:
 * MAC-based switching
 * Broadcast-domain separation
 
+SW1 and SW2 provide the Layer 2 switching infrastructure.
+
 ### Layer 3 — Routing
 
 Responsible for:
@@ -321,6 +341,8 @@ Responsible for:
 * Routing between departmental networks
 * Connectivity to the server network
 
+R1 provides these Layer 3 functions.
+
 ### Infrastructure Services
 
 Responsible for:
@@ -328,6 +350,8 @@ Responsible for:
 * DHCP
 * Centralized IP address allocation
 * DHCP relay
+
+The dedicated server network provides centralized infrastructure services.
 
 ---
 
@@ -345,19 +369,40 @@ VLAN segmentation provides:
 * A foundation for security policies
 * Easier network management
 
+---
+
+### Why use two different switch platforms?
+
+The lab intentionally uses two different Cisco switch models:
+
+```text
+SW1 → Cisco Catalyst 3560-24PS
+SW2 → Cisco Catalyst 2960
+```
+
+This demonstrates that VLANs and 802.1Q trunking can operate across different Cisco switch platforms when compatible Layer 2 configurations are used.
+
+It also makes the lab more representative of a mixed-device enterprise environment.
+
+---
+
 ### Why use Router-on-a-Stick?
 
-For this lab, Router-on-a-Stick provides a practical way to implement inter-VLAN routing using a single router interface.
+For this lab, Router-on-a-Stick provides a practical way to implement Inter-VLAN Routing using a single router interface.
 
 It reduces hardware requirements while demonstrating:
 
 * 802.1Q
-* Subinterfaces
+* Router subinterfaces
 * Inter-VLAN routing
 * Default gateways
 * DHCP relay
 
-For a larger production network, a Layer 3 switch would often be a more scalable choice.
+Although the Catalyst 3560 is capable of Layer 3 switching, R1 is intentionally used as the Layer 3 routing device in this project.
+
+For a larger production network, a Layer 3 switch would often provide a more scalable routing architecture.
+
+---
 
 ### Why centralize DHCP?
 
@@ -381,11 +426,13 @@ Verified functionality includes:
 * VLAN 10 connectivity
 * VLAN 20 connectivity
 * VLAN 30 connectivity
-* 802.1Q trunk operation
+* 802.1Q trunk operation between R1 and SW1
+* 802.1Q trunk operation between SW1 and SW2
 * Router-on-a-Stick
 * DHCP address assignment
 * DHCP relay
 * Inter-VLAN routing
 * Client-to-server connectivity
+* R1-to-DHCP-server connectivity
 
 This architecture represents the **baseline working network** before additional security and infrastructure features are introduced.
