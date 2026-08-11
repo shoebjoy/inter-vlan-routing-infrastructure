@@ -12,7 +12,7 @@ This project simulates a real-world enterprise LAN while following documentation
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
 | **Vendor**        | Cisco                                                                                                  |
 | **Project Type**  | Enterprise LAN                                                                                         |
-| **Difficulty**    | ⭐ Intermediate                                                                                         |
+| **Difficulty**    | ⭐ Beginner                                                                                         |
 | **Lab Platform**  | Cisco Packet Tracer 9.0.1                                                                              |
 | **Technologies**  | VLAN, IEEE 802.1Q Trunking, Router-on-a-Stick (ROAS), Inter-VLAN Routing, Centralized DHCP, DHCP Relay |
 | **Documentation** | Included                                                                                               |
